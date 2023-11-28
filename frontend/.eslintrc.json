@@ -1,0 +1,58 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:import/recommended"
+  ],
+  "ignorePatterns": ["dist"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "import", "prettier", "react", "react-hooks", "react-refresh"],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", ["parent", "sibling"], "index"],
+        "pathGroups": [
+          {
+            "pattern": "{react*,react*/**}",
+            "group": "external",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["next", "react"],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "react/react-in-jsx-scope": "off",
+    "sort-imports": [
+      "error",
+      {
+        "allowSeparatedGroups": true,
+        "ignoreCase": true,
+        "ignoreDeclarationSort": true,
+        "ignoreMemberSort": false,
+        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "project": "frontend/tsconfig.json"
+      }
+    }
+  }
+}
