@@ -4,14 +4,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RecoilRoot } from 'recoil';
 
-import GlobalStyle from '@styles/global';
+import HomePage from '@/pages/home';
+
+import '@/styles/shadcn.css';
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <></>,
+    element: <HomePage />,
   },
 ]);
 
@@ -20,7 +22,6 @@ function App() {
     <>
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
-          <GlobalStyle />
           <RouterProvider router={router} />
         </RecoilRoot>
         <ReactQueryDevtools initialIsOpen={false} />
