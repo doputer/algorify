@@ -1,3 +1,5 @@
+import path from 'path';
+
 import type { GatsbyConfig } from 'gatsby';
 
 const config: GatsbyConfig = {
@@ -6,7 +8,18 @@ const config: GatsbyConfig = {
     siteUrl: `https://www.yourdomain.tld`,
   },
   graphqlTypegen: true,
-  plugins: ['gatsby-plugin-typescript', 'gatsby-plugin-postcss'],
+  plugins: [
+    'gatsby-plugin-mdx',
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        name: 'posts',
+        path: path.resolve(__dirname, 'src/posts'),
+      },
+    },
+    'gatsby-plugin-typescript',
+    'gatsby-plugin-postcss',
+  ],
 };
 
 export default config;
