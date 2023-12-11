@@ -3,20 +3,7 @@
 ### Frontend
 
 - TypeScript
+- Gatsby
 - React
-- Recoil
-- Styled-components
-- React Query
+- Tailwind
 - Framer Motion
-- Vite
-- SWC
-
-### Backend
-
-- Python
-- Flask
-
-### Database
-
-- MongoDB
-- Mongoose

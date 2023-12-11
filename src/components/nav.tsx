@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 function Nav() {
   const groups = [
     {
@@ -27,7 +25,7 @@ function Nav() {
                     key={index}
                     className="border-l border-solid border-gray-300 px-2 py-2 font-medium hover:border-gray-500 hover:font-semibold"
                   >
-                    <Link to={'/' + groupItem.to}>{groupItem.name}</Link>
+                    {/* <Link to={'/' + groupItem.to}>{groupItem.name}</Link> */}
                   </li>
                 ))}
               </ul>
