@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import wait from '@/utils/wait';
 
 import bubbleSort from './algorithm/bubbleSort';
+import selectionSort from './algorithm/selectionSort';
 
 interface VisualizerProps {
   algorithm: string;
@@ -22,6 +23,7 @@ function Visualizer({ algorithm }: VisualizerProps) {
 
   useEffect(() => {
     algorithm === 'bubble' && operate(bubbleSort([...values]));
+    algorithm === 'selection' && operate(selectionSort([...values]));
   }, []);
 
   const changeColor = (target: HTMLDivElement, color: string) => {
