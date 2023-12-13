@@ -1,20 +1,16 @@
-import { GitHubLogoIcon, MagnifyingGlassIcon, SunIcon } from '@radix-ui/react-icons';
-
-import { Button } from '@/components/ui/button';
+import { GitHubLogoIcon, SunIcon } from '@radix-ui/react-icons';
 
 function Header() {
   return (
-    <header className="sticky left-0 top-0 flex h-14 items-center justify-between gap-8 border-b border-solid border-gray-200 px-8 py-0">
-      <h1 className="scroll-m-20 text-xl font-semibold tracking-tight">😀 Visual Algorithm</h1>
-      <div className="flex items-center justify-center gap-4">
-        <div className="flex w-full max-w-sm items-center space-x-2">
-          <Button variant="outline" className="gap-2 pr-24">
-            <MagnifyingGlassIcon />
-            <span className="text-sm text-muted-foreground">검색하기</span>
-          </Button>
+    <header className="mt-8 flex items-center justify-between">
+      <div className="text-xl font-bold tracking-tight">Algorify</div>
+      <div className="flex items-center gap-2">
+        <div>
+          <SunIcon width={20} height={20} />
         </div>
-        <GitHubLogoIcon className="h-6 w-6" />
-        <SunIcon className="h-6 w-6" />
+        <div>
+          <GitHubLogoIcon width={20} height={20} />
+        </div>
       </div>
     </header>
   );
