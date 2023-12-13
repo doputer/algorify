@@ -16,10 +16,12 @@ function Visualizer({ algorithm }: VisualizerProps) {
     hold: '#99d98c',
     done: '#7fc8f8',
   };
-  const values = [4, 3, 5, 8, 6, 9, 7, 2, 1];
+  const delay = 500;
+
+  const values = [9, 8, 7, 6, 5, 4, 3, 2, 1];
 
   useEffect(() => {
-    algorithm === 'bubble' && operate(bubbleSort(values));
+    algorithm === 'bubble' && operate(bubbleSort([...values]));
   }, []);
 
   const changeColor = (target: HTMLDivElement, color: string) => {
@@ -32,15 +34,13 @@ function Visualizer({ algorithm }: VisualizerProps) {
       payload: number[];
     }>
   ) => {
+    let done: number[] = [];
+
     for (const operation of operations) {
       const { type, payload } = operation;
 
       if (type === 'compare') {
-        await wait(300);
         payload.forEach((val) => changeColor(refs.current[val], palette.pick));
-
-        await wait(300);
-        payload.forEach((val) => changeColor(refs.current[val], palette.normal));
       } else if (type === 'swap') {
         const [p1, p2] = payload;
 
@@ -51,17 +51,21 @@ function Visualizer({ algorithm }: VisualizerProps) {
 
         [ref1.style.left, ref2.style.left] = [ref2.style.left, ref1.style.left];
         [refs.current[p1], refs.current[p2]] = [ref2, ref1];
-
-        await wait(300);
-        payload.forEach((val) => changeColor(refs.current[val], palette.normal));
       } else if (type === 'done') {
+        done = done.concat(payload);
         payload.forEach((val) => changeColor(refs.current[val], palette.done));
       }
+
+      await wait(delay);
+
+      payload.forEach(
+        (val) => !done.includes(val) && changeColor(refs.current[val], palette.normal)
+      );
     }
   };
 
   return (
-    <div className="relative h-[200px] w-[300px]">
+    <div className="relative h-[200px] w-full">
       {values.map((bar, index) => (
         <div
           key={bar}
@@ -71,7 +75,7 @@ function Visualizer({ algorithm }: VisualizerProps) {
             top: 200 - bar * 20,
             width: 20,
             height: bar * 20,
-            transition: 'left 0.3s',
+            transition: `left ${delay / 1000}s`,
           }}
           ref={(e: HTMLDivElement) => refs.current.push(e)}
         />
