@@ -1,33 +1,47 @@
-import { graphql, type HeadFC, type PageProps } from 'gatsby';
+import { graphql, PageProps } from 'gatsby';
 
-import Header from '@/components/header';
-import Main from '@/components/main';
-import Nav from '@/components/nav';
+function IndexPage({ data }: PageProps<Queries.PagesQuery>) {
+  const links: { [key: string]: string[] } = {};
 
-function IndexPage({ data }: PageProps<Queries.AlgorithmQuery>) {
+  data.allMdx.nodes.forEach((node) => {
+    const { frontmatter } = node;
+    const { type, title } = frontmatter;
+
+    if (type in links) links[type].push(title);
+    else links[type] = [title];
+  });
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <div className="flex flex-auto">
-        <Nav />
-        <Main content={data.mdx} />
-      </div>
+    <div>
+      {Object.entries(links).map(([groupName, groupItems]) => (
+        <div key={groupName} className="flex flex-col gap-2">
+          <div className="text-xl font-bold">{groupName}</div>
+          {groupItems.map((groupItem) => (
+            <a
+              key={groupItem}
+              href={groupItem.split(' ').join('-').toLowerCase()}
+              className="hover:font-semibold"
+            >
+              <div>{groupItem}</div>
+            </a>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
 
 export default IndexPage;
 
-export const Head: HeadFC = () => <title>Visual Algorithm</title>;
-
 export const query = graphql`
-  query Algorithm($slug: String) {
-    mdx(fields: { slug: { eq: $slug } }) {
-      frontmatter {
-        type
-        title
+  query Pages {
+    allMdx {
+      nodes {
+        frontmatter {
+          type
+          title
+        }
       }
-      body
     }
   }
 `;
