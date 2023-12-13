@@ -1,16 +1,26 @@
-import { GitHubLogoIcon, SunIcon } from '@radix-ui/react-icons';
+import { GitHubLogoIcon, MoonIcon, SunIcon } from '@radix-ui/react-icons';
+
+import useTheme from '@/hooks/useTheme';
 
 function Header() {
+  const [theme, toggleTheme] = useTheme();
+
   return (
-    <header className="mt-8 flex items-center justify-between">
-      <div className="text-xl font-bold tracking-tight">Algorify</div>
-      <div className="flex items-center gap-2">
-        <div>
-          <SunIcon width={20} height={20} />
-        </div>
-        <div>
+    <header className="flex items-center justify-between">
+      <a href="/">
+        <div className="text-xl font-bold tracking-tight">Algorify</div>
+      </a>
+      <div className="flex items-center gap-4">
+        <button onClick={toggleTheme}>
+          {theme === 'light' ? (
+            <SunIcon width={20} height={20} />
+          ) : (
+            <MoonIcon width={20} height={20} />
+          )}
+        </button>
+        <a href="https://github.com/doputer/algorify" target="_blank" rel="noreferrer">
           <GitHubLogoIcon width={20} height={20} />
-        </div>
+        </a>
       </div>
     </header>
   );
