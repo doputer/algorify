@@ -13,7 +13,7 @@ function PostPage({ data, children }: PostPageProps) {
     <>
       <div className="mb-2 flex items-center text-lg">
         <div className="text-muted-foreground">{type}</div>
-        <ChevronRightIcon className="mb-0.5" />
+        <ChevronRightIcon />
         <div className="font-semibold">{title}</div>
       </div>
       <h1 className="mb-12 text-4xl font-extrabold tracking-tight">{title}</h1>
