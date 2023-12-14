@@ -22,9 +22,9 @@ function Visualizer({ algorithm }: VisualizerProps) {
 
   const values = [5, 4, 1, 2, 3];
   // const values = [9, 8, 7, 6, 5, 4, 3, 2, 1];
-  let array = Array.from({ length: 5 }, (_, i) => i);
+  const array = Array.from({ length: 5 }, (_, i) => i);
 
-  const _delay = useRef<number>(500);
+  const _delay = useRef<number>(250);
   const _pause = useRef<boolean>(false);
 
   const [delay, setDelay] = useState(_delay.current);
@@ -120,11 +120,10 @@ function Visualizer({ algorithm }: VisualizerProps) {
     await wait();
 
     values.forEach((value, index) => {
-      refs.current[array[index]].style.left = `${(value - 1) * 30}px`;
+      refs.current[array[index]].style.height = `${value * 20}px`;
+      refs.current[array[index]].style.top = `${200 - value * 20}px`;
       changeColor(refs.current[index], palette.normal);
     });
-
-    array = Array.from({ length: 5 }, (_, i) => i);
 
     await wait();
 
@@ -150,15 +149,15 @@ function Visualizer({ algorithm }: VisualizerProps) {
   return (
     <>
       <div className="relative h-[200px] w-full">
-        {values.map((bar, index) => (
+        {values.map((value, index) => (
           <div
-            key={bar}
+            key={value}
             className={`absolute left-0 top-0 flex items-end justify-center rounded-md bg-gray-300`}
             style={{
               left: index * 30,
-              top: 200 - bar * 20,
+              top: 200 - value * 20,
               width: 20,
-              height: bar * 20,
+              height: value * 20,
               transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
             }}
             ref={(e: HTMLDivElement) => refs.current.push(e)}
