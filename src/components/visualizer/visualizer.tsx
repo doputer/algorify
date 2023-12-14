@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import wait from '@/utils/wait';
+import { PauseIcon, PlayIcon } from '@radix-ui/react-icons';
 
 import bubbleSort from './algorithm/bubbleSort';
 import selectionSort from './algorithm/selectionSort';
@@ -17,9 +17,25 @@ function Visualizer({ algorithm }: VisualizerProps) {
     hold: '#99d98c',
     done: '#7fc8f8',
   };
-  const delay = 500;
 
   const values = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+
+  const _delay = useRef<number>(500);
+  const _pause = useRef<boolean>(false);
+
+  const [delay, setDelay] = useState(_delay.current);
+  const [pause, setPause] = useState(_pause.current);
+
+  const wait = () =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        function __pause() {
+          if (_pause.current) setTimeout(__pause, 200);
+          else resolve(true);
+        }
+        __pause();
+      }, _delay.current);
+    });
 
   useEffect(() => {
     algorithm === 'bubble' && operate(bubbleSort([...values]));
@@ -58,7 +74,7 @@ function Visualizer({ algorithm }: VisualizerProps) {
         payload.forEach((val) => changeColor(refs.current[val], palette.done));
       }
 
-      await wait(delay);
+      await wait();
 
       payload.forEach(
         (val) => !done.includes(val) && changeColor(refs.current[val], palette.normal)
@@ -66,23 +82,47 @@ function Visualizer({ algorithm }: VisualizerProps) {
     }
   };
 
+  const controlPause = () => {
+    setPause(!pause);
+    _pause.current = !_pause.current;
+  };
+
+  const controlSpeed = () => {
+    if (delay === 15.625) {
+      setDelay(500);
+      _delay.current = 500;
+      return;
+    }
+
+    setDelay(delay / 2);
+    _delay.current = _delay.current / 2;
+  };
+
   return (
-    <div className="relative h-[200px] w-full">
-      {values.map((bar, index) => (
-        <div
-          key={bar}
-          className={`absolute left-0 top-0 flex items-end justify-center rounded-t-md bg-gray-300`}
-          style={{
-            left: index * 30,
-            top: 200 - bar * 20,
-            width: 20,
-            height: bar * 20,
-            transition: `left ${delay / 1000}s`,
-          }}
-          ref={(e: HTMLDivElement) => refs.current.push(e)}
-        />
-      ))}
-    </div>
+    <>
+      <div className="relative h-[200px] w-full">
+        {values.map((bar, index) => (
+          <div
+            key={bar}
+            className={`absolute left-0 top-0 flex items-end justify-center rounded-t-md bg-gray-300`}
+            style={{
+              left: index * 30,
+              top: 200 - bar * 20,
+              width: 20,
+              height: bar * 20,
+              transition: `left ${_delay.current / 1000}s`,
+            }}
+            ref={(e: HTMLDivElement) => refs.current.push(e)}
+          />
+        ))}
+      </div>
+      <div className="flex items-center gap-2 stroke-black stroke-2 text-xl font-bold">
+        <button onClick={() => controlPause()} className="rounded-full bg-[#d1d5db] p-1">
+          {pause ? <PlayIcon /> : <PauseIcon />}
+        </button>
+        <button onClick={() => controlSpeed()}>{500 / _delay.current}x</button>
+      </div>
+    </>
   );
 }
 
