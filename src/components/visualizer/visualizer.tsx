@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PauseIcon, PlayIcon } from '@radix-ui/react-icons';
 
 import bubbleSort from './algorithm/bubbleSort';
+import insertionSort from './algorithm/insertionSort';
 import selectionSort from './algorithm/selectionSort';
 
 interface VisualizerProps {
@@ -19,7 +20,9 @@ function Visualizer({ algorithm }: VisualizerProps) {
     done: '#7fc8f8',
   };
 
-  const values = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+  const values = [5, 4, 1, 2, 3];
+  // const values = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+  let array = Array.from({ length: 5 }, (_, i) => i);
 
   const _delay = useRef<number>(500);
   const _pause = useRef<boolean>(false);
@@ -41,6 +44,7 @@ function Visualizer({ algorithm }: VisualizerProps) {
   useEffect(() => {
     algorithm === 'bubble' && operate(() => bubbleSort([...values]));
     algorithm === 'selection' && operate(() => selectionSort([...values]));
+    algorithm === 'insertion' && operate(() => insertionSort([...values]));
 
     initRefs.current = [...refs.current];
   }, []);
@@ -51,42 +55,76 @@ function Visualizer({ algorithm }: VisualizerProps) {
 
   const operate = async (generator: () => Generator<{ type: string; payload: number[] }>) => {
     let done: number[] = [];
+    let temp: number = -1;
 
     for (const operation of generator()) {
       const { type, payload } = operation;
 
       if (type === 'compare') {
-        payload.forEach((val) => changeColor(refs.current[val], palette.pick));
+        payload.forEach((val) => changeColor(refs.current[array[val]], palette.pick));
       } else if (type === 'swap') {
         const [p1, p2] = payload;
 
-        payload.forEach((val) => changeColor(refs.current[val], palette.hold));
+        payload.forEach((val) => changeColor(refs.current[array[val]], palette.hold));
 
-        const ref1 = refs.current[p1];
-        const ref2 = refs.current[p2];
+        const ref1 = refs.current[array[p1]];
+        const ref2 = refs.current[array[p2]];
 
         [ref1.style.left, ref2.style.left] = [ref2.style.left, ref1.style.left];
-        [refs.current[p1], refs.current[p2]] = [ref2, ref1];
+        [array[p1], array[p2]] = [array[p2], array[p1]];
+      } else if (type === 'store') {
+        const [p1] = payload;
+
+        temp = array[p1];
+
+        refs.current[array[p1]].style.top = '208px';
+
+        payload.forEach((val) => changeColor(refs.current[array[val]], palette.pick));
+      } else if (type === 'restore') {
+        const [p1] = payload;
+
+        array[p1] = temp;
+        temp = -1;
+
+        const ref1 = refs.current[array[p1]];
+
+        ref1.style.left = `${p1 * 30}px`;
+
+        await wait();
+
+        ref1.style.setProperty('top', `calc(200px - ${ref1.style.height})`);
+      } else if (type === 'move') {
+        const [p1, p2] = payload;
+
+        const ref1 = refs.current[array[p1]];
+
+        ref1.style.setProperty('left', `calc(${ref1.style.left} + 30px)`);
+
+        [p1].forEach((val) => changeColor(refs.current[array[val]], palette.hold));
+
+        array[p2] = array[p1];
       } else if (type === 'done') {
-        done = done.concat(payload);
-        payload.forEach((val) => changeColor(refs.current[val], palette.done));
+        done = done.concat(payload.map((val) => array[val]));
+        payload.forEach((val) => changeColor(refs.current[array[val]], palette.done));
       }
 
       await wait();
 
       payload.forEach(
-        (val) => !done.includes(val) && changeColor(refs.current[val], palette.normal)
+        (val) => temp !== val && changeColor(refs.current[array[val]], palette.normal)
       );
+
+      done.forEach((val) => changeColor(refs.current[val], palette.done));
     }
 
     await wait();
 
     values.forEach((value, index) => {
-      refs.current[index].style.left = `${(value - 1) * 30}px`;
+      refs.current[array[index]].style.left = `${(value - 1) * 30}px`;
       changeColor(refs.current[index], palette.normal);
     });
 
-    refs.current = [...initRefs.current];
+    array = Array.from({ length: 5 }, (_, i) => i);
 
     await wait();
 
@@ -115,13 +153,13 @@ function Visualizer({ algorithm }: VisualizerProps) {
         {values.map((bar, index) => (
           <div
             key={bar}
-            className={`absolute left-0 top-0 flex items-end justify-center rounded-t-md bg-gray-300`}
+            className={`absolute left-0 top-0 flex items-end justify-center rounded-md bg-gray-300`}
             style={{
               left: index * 30,
               top: 200 - bar * 20,
               width: 20,
               height: bar * 20,
-              transition: `left ${_delay.current / 1000}s`,
+              transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
             }}
             ref={(e: HTMLDivElement) => refs.current.push(e)}
           />
