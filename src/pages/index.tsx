@@ -1,30 +1,30 @@
+import { FrameIcon } from '@radix-ui/react-icons';
 import { graphql, PageProps } from 'gatsby';
 
 function IndexPage({ data }: PageProps<Queries.PagesQuery>) {
-  const links: { [key: string]: string[] } = {};
-
-  data.allMdx.nodes.forEach((node) => {
-    const { frontmatter } = node;
-    const { type, title } = frontmatter;
-
-    if (type in links) links[type].push(title);
-    else links[type] = [title];
-  });
-
   return (
-    <div>
-      {Object.entries(links).map(([groupName, groupItems]) => (
-        <div key={groupName} className="flex flex-col gap-2">
-          <div className="text-xl font-bold">{groupName}</div>
-          {groupItems.map((groupItem) => (
+    <div className="flex flex-col gap-8">
+      {data.allMdx.nodes.map(({ frontmatter }, index) => (
+        <div key={index} className="flex flex-col gap-1">
+          <div>
             <a
-              key={groupItem}
-              href={groupItem.split(' ').join('-').toLowerCase()}
-              className="hover:font-semibold"
+              href={frontmatter.title.split(' ').join('-').toLowerCase()}
+              className="text-2xl font-bold text-sky-700 hover:text-sky-900 dark:hover:text-sky-500"
             >
-              <div>{groupItem}</div>
+              {frontmatter.title}
             </a>
-          ))}
+          </div>
+          <div className="flex gap-1">
+            {frontmatter.tags.map((tag) => (
+              <div
+                key={tag}
+                className="flex items-center gap-1 rounded-full bg-gray-100 px-2 dark:bg-gray-600"
+              >
+                <FrameIcon />
+                {tag}
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
@@ -35,11 +35,11 @@ export default IndexPage;
 
 export const query = graphql`
   query Pages {
-    allMdx {
+    allMdx(sort: { frontmatter: { title: ASC } }) {
       nodes {
         frontmatter {
-          type
           title
+          tags
         }
       }
     }

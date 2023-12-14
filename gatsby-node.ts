@@ -34,6 +34,7 @@ export const createSchemaCustomization: GatsbyNode['createSchemaCustomization'] 
     type Frontmatter {
       type: String!
       title: String!
+      tags: [String!]!
     }
   `);
 };
