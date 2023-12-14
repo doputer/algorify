@@ -77,7 +77,7 @@ function Visualizer({ algorithm }: VisualizerProps) {
 
         temp = array[p1];
 
-        refs.current[array[p1]].style.top = '208px';
+        refs.current[array[p1]].style.top = '0px';
 
         payload.forEach((val) => changeColor(refs.current[array[val]], palette.pick));
       } else if (type === 'restore') {
@@ -111,7 +111,7 @@ function Visualizer({ algorithm }: VisualizerProps) {
       await wait();
 
       payload.forEach(
-        (val) => temp !== val && changeColor(refs.current[array[val]], palette.normal)
+        (val) => temp !== array[val] && changeColor(refs.current[array[val]], palette.normal)
       );
 
       done.forEach((val) => changeColor(refs.current[val], palette.done));
