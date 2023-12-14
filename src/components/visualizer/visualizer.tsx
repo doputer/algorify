@@ -10,6 +10,7 @@ interface VisualizerProps {
 }
 
 function Visualizer({ algorithm }: VisualizerProps) {
+  const initRefs = useRef<HTMLDivElement[]>([]);
   const refs = useRef<HTMLDivElement[]>([]);
   const palette = {
     normal: '#d1d5db',
@@ -38,23 +39,20 @@ function Visualizer({ algorithm }: VisualizerProps) {
     });
 
   useEffect(() => {
-    algorithm === 'bubble' && operate(bubbleSort([...values]));
-    algorithm === 'selection' && operate(selectionSort([...values]));
+    algorithm === 'bubble' && operate(() => bubbleSort([...values]));
+    algorithm === 'selection' && operate(() => selectionSort([...values]));
+
+    initRefs.current = [...refs.current];
   }, []);
 
   const changeColor = (target: HTMLDivElement, color: string) => {
     target.style.backgroundColor = color;
   };
 
-  const operate = async (
-    operations: Generator<{
-      type: string;
-      payload: number[];
-    }>
-  ) => {
+  const operate = async (generator: () => Generator<{ type: string; payload: number[] }>) => {
     let done: number[] = [];
 
-    for (const operation of operations) {
+    for (const operation of generator()) {
       const { type, payload } = operation;
 
       if (type === 'compare') {
@@ -80,6 +78,19 @@ function Visualizer({ algorithm }: VisualizerProps) {
         (val) => !done.includes(val) && changeColor(refs.current[val], palette.normal)
       );
     }
+
+    await wait();
+
+    values.forEach((value, index) => {
+      refs.current[index].style.left = `${(value - 1) * 30}px`;
+      changeColor(refs.current[index], palette.normal);
+    });
+
+    refs.current = [...initRefs.current];
+
+    await wait();
+
+    operate(generator);
   };
 
   const controlPause = () => {
