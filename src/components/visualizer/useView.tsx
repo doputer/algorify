@@ -23,8 +23,8 @@ const generator: {
   [algorithm.COCKTAIL]: cocktail,
 };
 
-const useView = (algorithm: string) => {
-  const [values, setValues] = useState([3, 1, 7, 2, 6, 4, 5]);
+const useView = (algorithm: string, initValues: number[]) => {
+  const [values, setValues] = useState(initValues);
 
   const _pause = useRef(false);
   const _delay = useRef(500);

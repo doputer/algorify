@@ -1,7 +1,12 @@
 import useView from './useView';
 
-function Visualizer({ algorithm }: { algorithm: string }) {
-  const [Viewer, Controller] = useView(algorithm);
+interface VisualizerProps {
+  algorithm: string;
+  values: number[];
+}
+
+function Visualizer({ algorithm, values = [1, 2, 3] }: VisualizerProps) {
+  const [Viewer, Controller] = useView(algorithm, values);
 
   return (
     <>
