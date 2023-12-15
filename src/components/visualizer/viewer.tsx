@@ -15,14 +15,15 @@ const Palette = {
   done: '#7fc8f8',
 };
 
-function Viewer({ values, _pause, _delay, cb, generator }: ViewerProps) {
+function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
   const refs = useRef<HTMLDivElement[]>([]);
-  const array = Array.from({ length: values.length }, (_, i) => i);
+  const pointer = Array.from({ length: values.length }, (_, i) => i);
 
   useEffect(() => {
     operate();
   }, []);
 
+  /* Utils */
   const wait = () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -34,74 +35,96 @@ function Viewer({ values, _pause, _delay, cb, generator }: ViewerProps) {
       }, _delay.current);
     });
 
-  const changeColor = (target: HTMLDivElement, color: string) => {
-    target.style.backgroundColor = color;
+  const changeColor = (indexes: number[], color: string) => {
+    indexes.forEach((index) => (refs.current[pointer[index]].style.background = color));
+  };
+
+  /* Operators */
+  let temp = -1;
+  let doneBlocks: number[] = [];
+
+  const access = (payload: number[]) => {
+    changeColor(payload, Palette.pick);
+  };
+
+  const swap = (payload: number[]) => {
+    const [i, j] = payload;
+    const ref1 = refs.current[pointer[i]];
+    const ref2 = refs.current[pointer[j]];
+
+    changeColor(payload, Palette.hold);
+
+    [pointer[i], pointer[j]] = [pointer[j], pointer[i]];
+    [ref1.style.left, ref2.style.left] = [ref2.style.left, ref1.style.left];
+  };
+
+  const store = (payload: number[]) => {
+    const [i] = payload;
+    const ref = refs.current[pointer[i]];
+
+    changeColor(payload, Palette.pick);
+
+    temp = pointer[i];
+    ref.style.top = 0 + 'px';
+  };
+
+  const restore = async (payload: number[]) => {
+    const [i] = payload;
+    const ref = refs.current[temp];
+
+    ref.style.left = i * 30 + 'px';
+    await wait();
+    ref.style.top = 200 - values[temp] * 20 + 'px';
+
+    pointer[i] = temp;
+    temp = -1;
+  };
+
+  const right = (payload: number[]) => {
+    const [i, j] = payload;
+    const ref = refs.current[pointer[i]];
+
+    changeColor([i], Palette.hold);
+    ref.style.left = j * 30 + 'px';
+
+    pointer[j] = pointer[i];
+  };
+
+  const done = (payload: number[]) => {
+    doneBlocks = doneBlocks.concat(payload.map((i) => pointer[i]));
+    doneBlocks.forEach((i) => (refs.current[i].style.background = Palette.done));
+  };
+
+  const type = {
+    ACCESS: 'access',
+    SWAP: 'swap',
+    STORE: 'store',
+    RESTORE: 'restore',
+    RIGHT: 'right',
+    DONE: 'done',
+  };
+
+  const operator = {
+    [type.ACCESS]: access,
+    [type.SWAP]: swap,
+    [type.STORE]: store,
+    [type.RESTORE]: restore,
+    [type.RIGHT]: right,
+    [type.DONE]: done,
   };
 
   const operate = async () => {
-    let done: number[] = [];
-    let temp: number = -1;
-
     await wait();
 
-    for (const operation of generator()) {
-      const { type, payload } = operation;
+    for (const { type, payload } of generator()) {
+      await operator[type](payload);
 
-      if (type === 'compare') {
-        payload.forEach((val) => changeColor(refs.current[array[val]], Palette.pick));
-      } else if (type === 'swap') {
-        const [p1, p2] = payload;
+      if (type !== 'done') await wait();
 
-        payload.forEach((val) => changeColor(refs.current[array[val]], Palette.hold));
-
-        const ref1 = refs.current[array[p1]];
-        const ref2 = refs.current[array[p2]];
-
-        [ref1.style.left, ref2.style.left] = [ref2.style.left, ref1.style.left];
-        [array[p1], array[p2]] = [array[p2], array[p1]];
-      } else if (type === 'store') {
-        const [p1] = payload;
-
-        temp = array[p1];
-
-        refs.current[array[p1]].style.top = '0px';
-
-        payload.forEach((val) => changeColor(refs.current[array[val]], Palette.pick));
-      } else if (type === 'restore') {
-        const [p1] = payload;
-
-        array[p1] = temp;
-        temp = -1;
-
-        const ref1 = refs.current[array[p1]];
-
-        ref1.style.left = `${p1 * 30}px`;
-
-        await wait();
-
-        ref1.style.setProperty('top', `calc(200px - ${ref1.style.height})`);
-      } else if (type === 'move') {
-        const [p1, p2] = payload;
-
-        const ref1 = refs.current[array[p1]];
-
-        ref1.style.setProperty('left', `calc(${ref1.style.left} + 30px)`);
-
-        [p1].forEach((val) => changeColor(refs.current[array[val]], Palette.hold));
-
-        array[p2] = array[p1];
-      } else if (type === 'done') {
-        done = done.concat(payload.map((val) => array[val]));
-        payload.forEach((val) => changeColor(refs.current[array[val]], Palette.done));
-      }
-
-      await wait();
-
-      payload.forEach(
-        (val) => temp !== array[val] && changeColor(refs.current[array[val]], Palette.normal)
+      changeColor(
+        payload.filter((i) => temp !== pointer[i]).filter((j) => !doneBlocks.includes(pointer[j])),
+        Palette.normal
       );
-
-      done.forEach((val) => changeColor(refs.current[val], Palette.done));
     }
 
     await wait();
@@ -114,7 +137,7 @@ function Viewer({ values, _pause, _delay, cb, generator }: ViewerProps) {
       {values.map((value, index) => (
         <div
           key={value}
-          className={`absolute left-0 top-0 flex items-end justify-center rounded-md bg-gray-300`}
+          className="absolute rounded-md bg-gray-300"
           style={{
             left: index * 30,
             top: 200 - value * 20,
