@@ -1,6 +1,7 @@
 import type { GatsbyConfig } from 'gatsby';
 
 const config: GatsbyConfig = {
+  pathPrefix: '/algorify',
   siteMetadata: {
     title: `Algorify`,
     siteUrl: `https://www.yourdomain.tld`,
