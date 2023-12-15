@@ -1,5 +1,7 @@
 import { MutableRefObject, useEffect, useRef } from 'react';
 
+import useMeasure from '@/hooks/useMeasure';
+
 interface ViewerProps {
   values: number[];
   _pause: MutableRefObject<boolean>;
@@ -16,12 +18,19 @@ const Palette = {
 };
 
 function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const refs = useRef<HTMLDivElement[]>([]);
+  const sizeRef = useRef(0);
+  const [viewWidth] = useMeasure(rootRef);
   const pointer = Array.from({ length: values.length }, (_, i) => i);
 
   useEffect(() => {
     operate();
   }, []);
+
+  useEffect(() => {
+    sizeRef.current = Math.min(20, ~~((viewWidth - 10 * (values.length - 1)) / values.length));
+  }, [viewWidth]);
 
   /* Utils */
   const wait = () =>
@@ -72,7 +81,7 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
     const [i] = payload;
     const ref = refs.current[temp];
 
-    ref.style.left = i * 30 + 'px';
+    ref.style.left = i * (sizeRef.current + 10) + 'px';
     await wait();
     ref.style.top = 200 - values[temp] * 20 + 'px';
 
@@ -85,7 +94,7 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
     const ref = refs.current[pointer[i]];
 
     changeColor([i], Palette.hold);
-    ref.style.left = j * 30 + 'px';
+    ref.style.left = j * (sizeRef.current + 10) + 'px';
 
     pointer[j] = pointer[i];
   };
@@ -116,6 +125,14 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
   const operate = async () => {
     await wait();
 
+    pointer.forEach((i, j) => {
+      refs.current[i].style.left = j * (sizeRef.current + 10) + 'px';
+      refs.current[i].style.width = sizeRef.current + 'px';
+      refs.current[i].style.transition = `none`;
+    });
+
+    await wait();
+
     for (const { type, payload } of generator()) {
       await operator[type](payload);
 
@@ -126,7 +143,13 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
         Palette.normal
       );
 
-      refs.current.forEach((i) => (i.style.transitionDuration = `${_delay.current / 1000}s`));
+      pointer.forEach((i, j) => {
+        refs.current[i].style.left = j * (sizeRef.current + 10) + 'px';
+        refs.current[i].style.width = sizeRef.current + 'px';
+        refs.current[i].style.transition = `left ${_delay.current / 1000}s, top ${
+          _delay.current / 1000
+        }s`;
+      });
     }
 
     await wait();
@@ -135,19 +158,19 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
   };
 
   return (
-    <div className="relative h-[200px] w-full">
+    <div className="relative h-[200px] w-full" ref={rootRef}>
       {values.map((value, index) => (
         <div
-          key={value}
+          key={index}
           className="absolute rounded-md bg-gray-300"
           style={{
-            left: index * 30,
+            left: index * (sizeRef.current + 10),
             top: 200 - value * 20,
-            width: 20,
+            width: sizeRef.current,
             height: value * 20,
             transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
           }}
-          ref={(e: HTMLDivElement) => refs.current.push(e)}
+          ref={(e: HTMLDivElement) => (refs.current[index] = e)}
         />
       ))}
     </div>
