@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
 import bubble from './algorithm/bubbleSort';
+import cocktail from './algorithm/cocktailSort';
 import insertion from './algorithm/insertionSort';
 import selection from './algorithm/selectionSort';
 import Controller from './controller';
@@ -10,6 +11,7 @@ const algorithm = {
   BUBBLE: 'bubble',
   SELECTION: 'selection',
   INSERTION: 'insertion',
+  COCKTAIL: 'cocktail',
 };
 
 const generator: {
@@ -18,13 +20,14 @@ const generator: {
   [algorithm.BUBBLE]: bubble,
   [algorithm.SELECTION]: selection,
   [algorithm.INSERTION]: insertion,
+  [algorithm.COCKTAIL]: cocktail,
 };
 
 const useView = (algorithm: string) => {
   const [values, setValues] = useState([3, 1, 7, 2, 6, 4, 5]);
 
   const _pause = useRef(false);
-  const _delay = useRef(250);
+  const _delay = useRef(500);
 
   const viewer = () => {
     return (
