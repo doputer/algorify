@@ -125,6 +125,8 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
         payload.filter((i) => temp !== pointer[i]).filter((j) => !doneBlocks.includes(pointer[j])),
         Palette.normal
       );
+
+      refs.current.forEach((i) => (i.style.transitionDuration = `${_delay.current / 1000}s`));
     }
 
     await wait();
