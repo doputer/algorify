@@ -1,4 +1,3 @@
-import { FrameIcon } from '@radix-ui/react-icons';
 import { graphql, PageProps } from 'gatsby';
 
 function IndexPage({ data }: PageProps<Queries.PagesQuery>) {
@@ -18,9 +17,8 @@ function IndexPage({ data }: PageProps<Queries.PagesQuery>) {
             {frontmatter.tags.map((tag) => (
               <div
                 key={tag}
-                className="flex items-center gap-1 rounded-full bg-gray-100 px-2 dark:bg-gray-600"
+                className="flex items-center gap-1 rounded-sm bg-gray-200 px-1 text-sm dark:bg-gray-600"
               >
-                <FrameIcon />
                 {tag}
               </div>
             ))}
