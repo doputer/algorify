@@ -1,4 +1,4 @@
-function insertionSort(array: number[]) {
+function algorithm(array: number[]) {
   function* generator(array: number[]) {
     for (let i = 1; i < array.length; i++) {
       const temp = array[i];
@@ -7,7 +7,8 @@ function insertionSort(array: number[]) {
       yield { type: 'store', payload: [i] };
 
       while (aux >= 0 && array[aux] > temp) {
-        yield { type: 'move', payload: [aux, aux + 1] };
+        yield { type: 'right', payload: [aux, aux + 1] };
+        yield { type: 'done', payload: [aux + 1] };
 
         array[aux + 1] = array[aux];
         aux--;
@@ -19,12 +20,10 @@ function insertionSort(array: number[]) {
       yield { type: 'done', payload: [aux + 1] };
     }
 
-    yield { type: 'done', payload: [array.length - 1] };
-
     return array;
   }
 
   return generator(array);
 }
 
-export default insertionSort;
+export default algorithm;

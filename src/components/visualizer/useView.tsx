@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
 
-import bubble from './algorithm/bubbleSort';
-import cocktail from './algorithm/cocktailSort';
-import insertion from './algorithm/insertionSort';
-import selection from './algorithm/selectionSort';
+import bubble from './algorithm/bubble-sort';
+import cocktail from './algorithm/cocktail-sort';
+import insertion from './algorithm/insertion-sort';
+import selection from './algorithm/selectioin-sort';
 import Controller from './controller';
 import Viewer from './viewer';
 

@@ -1,10 +1,10 @@
-function selectionSort(array: number[]) {
+function algorithm(array: number[]) {
   function* generator(array: number[]) {
     for (let i = 0; i < array.length - 1; i++) {
       let indexMin = i;
 
       for (let j = i + 1; j < array.length; j++) {
-        yield { type: 'compare', payload: [i, j] };
+        yield { type: 'access', payload: [i, j] };
 
         if (array[j] < array[indexMin]) {
           indexMin = j;
@@ -25,4 +25,4 @@ function selectionSort(array: number[]) {
   return generator(array);
 }
 
-export default selectionSort;
+export default algorithm;

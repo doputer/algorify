@@ -1,11 +1,11 @@
-function cocktailSort(array: number[]) {
+function algorithm(array: number[]) {
   function* generator(array: number[]) {
     let left = 0;
     let right = array.length - 1;
 
     while (1) {
       for (let i = left; i < right; i++) {
-        yield { type: 'compare', payload: [i, i + 1] };
+        yield { type: 'access', payload: [i, i + 1] };
 
         if (array[i] > array[i + 1]) {
           yield { type: 'swap', payload: [i, i + 1] };
@@ -22,7 +22,7 @@ function cocktailSort(array: number[]) {
       right--;
 
       for (let i = right; i > left; i--) {
-        yield { type: 'compare', payload: [i - 1, i] };
+        yield { type: 'access', payload: [i - 1, i] };
 
         if (array[i - 1] > array[i]) {
           yield { type: 'swap', payload: [i - 1, i] };
@@ -45,4 +45,4 @@ function cocktailSort(array: number[]) {
   return generator(array);
 }
 
-export default cocktailSort;
+export default algorithm;
