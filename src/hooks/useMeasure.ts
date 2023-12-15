@@ -1,6 +1,8 @@
 import { RefObject, useEffect, useState } from 'react';
 
 const useMeasure = (ref: RefObject<HTMLDivElement>) => {
+  if (!(typeof window !== 'undefined')) return [0];
+
   const [width, setWidth] = useState(0);
 
   const observer = new ResizeObserver((entries) => {

@@ -1,0 +1,32 @@
+name: Gatsby Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-
+
+      - name: Install Dependencies
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: yarn install --prod
+
+      - name: Gatsby Deploy
+        run: yarn deploy

@@ -7,7 +7,7 @@ function Header() {
 
   return (
     <header className="flex items-center justify-between">
-      <a href="/">
+      <a href="/algorify">
         <div className="text-xl font-bold tracking-tight">Algorify</div>
       </a>
       <div className="flex items-center gap-4">
