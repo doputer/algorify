@@ -4,7 +4,7 @@ const config: GatsbyConfig = {
   pathPrefix: '/algorify',
   siteMetadata: {
     title: `Algorify`,
-    siteUrl: `https://www.yourdomain.tld`,
+    siteUrl: `https://doputer.github.io/algorify`,
   },
   graphqlTypegen: true,
   trailingSlash: 'never',
@@ -20,6 +20,9 @@ const config: GatsbyConfig = {
       __key: 'posts',
     },
   ],
+  flags: {
+    DEV_SSR: true,
+  },
 };
 
 export default config;

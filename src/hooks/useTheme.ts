@@ -1,28 +1,25 @@
 import { useEffect, useState } from 'react';
 
-const useTheme = (): [string, () => void] => {
-  const checkTheme = () => {
-    const theme = localStorage.getItem('theme');
+declare global {
+  interface Window {
+    __theme: string;
+    __setTheme: (theme: string) => void;
+  }
+}
 
-    if (!theme) return 'light';
-    return theme;
-  };
-  const [theme, setDark] = useState(() => checkTheme());
+const useTheme = (): [() => void] => {
+  const [theme, setTheme] = useState('');
+
   const toggleTheme = () => {
-    setDark(theme === 'light' ? 'dark' : 'light');
+    setTheme(theme === 'light' ? 'dark' : 'light');
+    window.__setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [theme]);
+    setTheme(window.__theme);
+  }, []);
 
-  return [theme, toggleTheme];
+  return [toggleTheme];
 };
 
 export default useTheme;
