@@ -29,10 +29,16 @@ function Controller({ _pause, _delay }: ControllerProps) {
 
   return (
     <div className="flex items-center gap-2 stroke-black stroke-2 text-xl font-bold">
-      <button onClick={() => changePause()} className="rounded-full bg-[#d1d5db] p-1">
+      <button
+        onClick={() => changePause()}
+        className="rounded-full bg-[#d1d5db] p-1"
+        aria-label={pause ? 'play_button' : 'pause_button'}
+      >
         {pause ? <PlayIcon /> : <PauseIcon />}
       </button>
-      <button onClick={() => changeSpeed()}>{500 / _delay.current}x</button>
+      <button onClick={() => changeSpeed()} aria-label="delay_button">
+        {500 / _delay.current}x
+      </button>
     </div>
   );
 }
