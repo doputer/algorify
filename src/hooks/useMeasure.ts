@@ -3,9 +3,13 @@ import { RefObject, useEffect, useState } from 'react';
 const useMeasure = (ref: RefObject<HTMLDivElement>) => {
   const [width, setWidth] = useState(0);
 
-  const observer = new ResizeObserver((entries) => {
-    entries.forEach((entry) => setWidth(entry.contentRect.width));
-  });
+  let observer: ResizeObserver;
+
+  useEffect(() => {
+    observer = new ResizeObserver((entries) => {
+      entries.forEach((entry) => setWidth(entry.contentRect.width));
+    });
+  }, []);
 
   useEffect(() => {
     if (!ref) return;
