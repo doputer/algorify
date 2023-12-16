@@ -9,6 +9,7 @@ const scriptElement = [
     dangerouslySetInnerHTML: {
       __html: `
         try {
+          const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
           const theme = localStorage.getItem('theme');
 
           window.__setTheme = (newTheme) => {
@@ -18,7 +19,11 @@ const scriptElement = [
             localStorage.setItem('theme', newTheme);
           }
 
-          window.__theme = theme;
+          darkQuery.addListener((event) => {
+            window.__setTheme(event.matches ? 'dark' : 'light');
+          });
+
+          window.__theme = theme || (darkQuery.matches ? 'dark' : 'light');
           window.__setTheme(theme);
         } catch (e) {}
       `,
