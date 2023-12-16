@@ -20,6 +20,9 @@ const config: GatsbyConfig = {
       __key: 'posts',
     },
   ],
+  flags: {
+    DEV_SSR: true,
+  },
 };
 
 export default config;
