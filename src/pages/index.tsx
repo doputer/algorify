@@ -1,5 +1,7 @@
 import { graphql, PageProps } from 'gatsby';
 
+import SEO from '@/components/seo';
+
 function IndexPage({ data }: PageProps<Queries.PagesQuery>) {
   return (
     <div className="flex flex-col gap-8">
@@ -43,3 +45,5 @@ export const query = graphql`
     }
   }
 `;
+
+export const Head = () => <SEO />;

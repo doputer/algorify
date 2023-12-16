@@ -2,6 +2,7 @@ import { MDXProvider } from '@mdx-js/react';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 import { graphql } from 'gatsby';
 
+import SEO from '@/components/seo';
 import h2 from '@/components/typography/h2';
 
 interface PostPageProps {
@@ -39,3 +40,5 @@ export const query = graphql`
     }
   }
 `;
+
+export const Head = () => <SEO />;
