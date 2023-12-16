@@ -11,11 +11,16 @@ function Header() {
         <div className="text-xl font-bold tracking-tight">Algorify</div>
       </a>
       <div className="flex items-center gap-4">
-        <button onClick={toggleTheme}>
+        <button onClick={toggleTheme} aria-label="theme_button">
           <SunIcon width={20} height={20} className="hidden dark:block" />
           <MoonIcon width={20} height={20} className="dark:hidden" />
         </button>
-        <a href="https://github.com/doputer/algorify" target="_blank" rel="noreferrer">
+        <a
+          href="https://github.com/doputer/algorify"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="github_anchor"
+        >
           <GitHubLogoIcon width={20} height={20} />
         </a>
       </div>
