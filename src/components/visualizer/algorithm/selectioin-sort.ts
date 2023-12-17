@@ -8,6 +8,7 @@ function algorithm(array: number[]) {
 
         if (array[j] < array[indexMin]) {
           indexMin = j;
+          yield { type: 'flag', payload: [j] };
         }
       }
 

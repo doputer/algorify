@@ -81,7 +81,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
           'rounded-md',
           'bg-[#d1d5db]',
           !visible && 'invisible',
-          store && 'bg-flag',
+          (labels.flag.includes(x) || store) && 'bg-flag',
           labels.pick.includes(x) && 'bg-pick',
           !store && labels.hold.includes(x) && 'bg-hold',
           !store && !labels.hold.includes(x) && labels.done.includes(x) && 'bg-done',
@@ -171,6 +171,17 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     });
   };
 
+  const flag = (payload: number[]) => {
+    setEvent((prev) => {
+      const { labels } = prev;
+
+      return {
+        ...prev,
+        labels: { ...labels, flag: [...payload] },
+      };
+    });
+  };
+
   const done = (payload: number[]) => {
     setEvent((prev) => {
       const { labels } = prev;
@@ -203,10 +214,11 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       else if (type === 'store') store(payload);
       else if (type === 'restore') restore(payload);
       else if (type === 'move') move(payload);
+      else if (type === 'flag') flag(payload);
       else if (type === 'done') done(payload);
       else if (type === 'end') end();
 
-      if (type !== 'done') await wait();
+      if (type !== 'done' && type !== 'flag') await wait();
     }
 
     await wait();
