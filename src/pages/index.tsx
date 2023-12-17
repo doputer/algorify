@@ -15,7 +15,7 @@ function IndexPage({ data }: PageProps<Queries.PagesQuery>) {
               {frontmatter.title}
             </a>
           </div>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {frontmatter.tags.map((tag) => (
               <div
                 key={tag}
