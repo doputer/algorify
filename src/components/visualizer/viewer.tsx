@@ -1,4 +1,6 @@
-import { MutableRefObject, useEffect, useMemo, useState } from 'react';
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
+
+import { UpdateIcon } from '@radix-ui/react-icons';
 
 interface ViewerProps {
   values: number[];
@@ -39,6 +41,9 @@ interface Event {
 
 function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
   /* Utils */
+  const rootRef = useRef<HTMLDivElement>(null);
+  const sizeRef = useRef(0);
+
   const wait = () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -67,9 +72,9 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       const { key, x, value, store, visible } = block;
 
       acc[key] = {
-        left: x * (20 + 10),
+        left: x * (sizeRef.current + 10),
         top: store ? 0 : 200 - value * 20,
-        width: 20,
+        width: sizeRef.current,
         height: value * 20,
         className: [
           'absolute',
@@ -213,21 +218,36 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     operate();
   }, []);
 
+  useEffect(() => {
+    if (!rootRef.current) return;
+
+    sizeRef.current = Math.min(
+      20,
+      ~~((rootRef.current.offsetWidth - 10 * (values.length - 1)) / values.length)
+    );
+  }, [rootRef]);
+
   return (
-    <div className="relative h-[200px] w-full">
-      {values.map((_, index) => (
-        <div
-          key={index}
-          className={props[index].className}
-          style={{
-            top: props[index].top,
-            left: props[index].left,
-            width: props[index].width,
-            height: props[index].height,
-            transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
-          }}
-        />
-      ))}
+    <div className="relative h-[200px] w-full" ref={rootRef}>
+      {!rootRef.current ? (
+        <div className="flex h-[200px] w-full animate-spin items-center justify-center">
+          <UpdateIcon width={20} height={20} className="stroke-gray-500 dark:stroke-gray-300" />
+        </div>
+      ) : (
+        values.map((_, index) => (
+          <div
+            key={index}
+            className={props[index].className}
+            style={{
+              top: props[index].top,
+              left: props[index].left,
+              width: props[index].width,
+              height: props[index].height,
+              transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
+            }}
+          />
+        ))
+      )}
     </div>
   );
 }
