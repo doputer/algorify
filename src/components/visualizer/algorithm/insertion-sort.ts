@@ -7,7 +7,7 @@ function algorithm(array: number[]) {
       yield { type: 'store', payload: [i] };
 
       while (aux >= 0 && array[aux] > temp) {
-        yield { type: 'right', payload: [aux, aux + 1] };
+        yield { type: 'move', payload: [aux, aux + 1] };
         yield { type: 'done', payload: [aux + 1] };
 
         array[aux + 1] = array[aux];
@@ -19,6 +19,8 @@ function algorithm(array: number[]) {
       yield { type: 'restore', payload: [aux + 1] };
       yield { type: 'done', payload: [aux + 1] };
     }
+
+    yield { type: 'end', payload: [] };
 
     return array;
   }

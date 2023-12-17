@@ -5,14 +5,15 @@ function algorithm(array: number[]) {
 
     while (1) {
       for (let i = left; i < right; i++) {
-        yield { type: 'access', payload: [i, i + 1] };
+        yield { type: 'pick', payload: [i, i + 1] };
 
         if (array[i] > array[i + 1]) {
           yield { type: 'swap', payload: [i, i + 1] };
           [array[i], array[i + 1]] = [array[i + 1], array[i]];
         }
         if (left + 1 === right) {
-          yield { type: 'done', payload: [left, right] };
+          yield { type: 'end', payload: [] };
+
           return array;
         }
       }
@@ -22,14 +23,15 @@ function algorithm(array: number[]) {
       right--;
 
       for (let i = right; i > left; i--) {
-        yield { type: 'access', payload: [i - 1, i] };
+        yield { type: 'pick', payload: [i - 1, i] };
 
         if (array[i - 1] > array[i]) {
           yield { type: 'swap', payload: [i - 1, i] };
           [array[i - 1], array[i]] = [array[i], array[i - 1]];
         }
         if (left + 1 === right) {
-          yield { type: 'done', payload: [left, right] };
+          yield { type: 'end', payload: [] };
+
           return array;
         }
       }

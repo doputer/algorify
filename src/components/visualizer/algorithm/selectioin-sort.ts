@@ -4,7 +4,7 @@ function algorithm(array: number[]) {
       let indexMin = i;
 
       for (let j = i + 1; j < array.length; j++) {
-        yield { type: 'access', payload: [i, j] };
+        yield { type: 'pick', payload: [i, j] };
 
         if (array[j] < array[indexMin]) {
           indexMin = j;
@@ -17,7 +17,7 @@ function algorithm(array: number[]) {
       yield { type: 'done', payload: [i] };
     }
 
-    yield { type: 'done', payload: [array.length - 1] };
+    yield { type: 'end', payload: [] };
 
     return array;
   }

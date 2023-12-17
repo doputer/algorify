@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 
 import bubble from './algorithm/bubble-sort';
 import cocktail from './algorithm/cocktail-sort';
+import comb from './algorithm/comb-sort';
 import insertion from './algorithm/insertion-sort';
 import selection from './algorithm/selectioin-sort';
 import Controller from './controller';
@@ -12,6 +13,7 @@ const algorithm = {
   SELECTION: 'selection',
   INSERTION: 'insertion',
   COCKTAIL: 'cocktail',
+  COMB: 'comb',
 };
 
 const generator: {
@@ -21,6 +23,7 @@ const generator: {
   [algorithm.SELECTION]: selection,
   [algorithm.INSERTION]: insertion,
   [algorithm.COCKTAIL]: cocktail,
+  [algorithm.COMB]: comb,
 };
 
 const useView = (algorithm: string, initValues: number[]) => {
@@ -36,9 +39,7 @@ const useView = (algorithm: string, initValues: number[]) => {
         _pause={_pause}
         _delay={_delay}
         generator={() => generator[algorithm]([...values])}
-        cb={() => {
-          setValues([...values]);
-        }}
+        reset={() => setValues([...values])}
       />
     );
   };
