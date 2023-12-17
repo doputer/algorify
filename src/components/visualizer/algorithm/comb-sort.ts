@@ -16,7 +16,7 @@ function algorithm(array: number[]) {
       let i = 0;
 
       while (i + gap < array.length) {
-        yield { type: 'access', payload: [i, i + gap] };
+        yield { type: 'pick', payload: [i, i + gap] };
 
         if (array[i] > array[i + gap]) {
           yield { type: 'swap', payload: [i, i + gap] };

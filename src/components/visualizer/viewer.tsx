@@ -7,6 +7,35 @@ interface ViewerProps {
   generator: () => Generator<{ type: string; payload: number[] }>;
 }
 
+interface Prop {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  className: string;
+}
+
+interface Label {
+  pick: number[];
+  hold: number[];
+  flag: number[];
+  done: number[];
+}
+
+interface Block {
+  key: number;
+  x: number;
+  value: number;
+  store: boolean;
+  visible: boolean;
+}
+
+interface Event {
+  labels: Label;
+  blocks: Block[];
+  stores: Block[];
+}
+
 function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
   /* Utils */
   const wait = () =>
@@ -20,8 +49,8 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
       }, _delay.current);
     });
 
-  const [event, setEvent] = useState({
-    labels: { access: [], hold: [], done: [], flag: [] },
+  const [event, setEvent] = useState<Event>({
+    labels: { pick: [], hold: [], flag: [], done: [] },
     blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false, visible: true })),
     stores: [],
   });
@@ -29,7 +58,7 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
   const props = useMemo(() => {
     const { labels, blocks, stores } = event;
 
-    const acc: any[] = [];
+    const acc: Prop[] = [];
 
     [...blocks, ...stores].filter(Boolean).forEach((block) => {
       const { key, x, value, store, visible } = block;
@@ -45,7 +74,7 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
           'bg-[#d1d5db]',
           !visible && 'invisible',
           store && 'bg-flag',
-          labels.access.includes(x) && 'bg-pick',
+          labels.pick.includes(x) && 'bg-pick',
           !store && labels.hold.includes(x) && 'bg-hold',
           !store && !labels.hold.includes(x) && labels.done.includes(x) && 'bg-done',
         ]
@@ -58,13 +87,13 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
   }, [event]);
 
   /* Operators */
-  const access = (payload: number[]) => {
+  const pick = (payload: number[]) => {
     setEvent((prev) => {
       const { labels } = prev;
 
       return {
         ...prev,
-        labels: { ...labels, access: [...payload], hold: [] },
+        labels: { ...labels, pick: [...payload], hold: [] },
       };
     });
   };
@@ -79,7 +108,7 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
 
       return {
         ...prev,
-        labels: { ...labels, access: [], hold: [...payload] },
+        labels: { ...labels, pick: [], hold: [...payload] },
         blocks: blocks.map((block, index) => ({ ...block, x: index })),
       };
     });
@@ -106,8 +135,9 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
 
     setEvent((prev) => {
       const { labels, blocks, stores } = prev;
+      const target = stores.pop();
 
-      blocks[i] = { ...stores.pop(), store: false };
+      if (target) blocks[i] = { ...target, store: false };
 
       return {
         ...prev,
@@ -146,7 +176,7 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
 
   const operate = async () => {
     for (const { type, payload } of generator()) {
-      if (type === 'access') access(payload);
+      if (type === 'pick') pick(payload);
       else if (type === 'swap') swap(payload);
       else if (type === 'store') store(payload);
       else if (type === 'restore') restore(payload);
