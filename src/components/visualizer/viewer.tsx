@@ -1,37 +1,13 @@
-import { MutableRefObject, useEffect, useRef } from 'react';
-
-import useMeasure from '@/hooks/useMeasure';
+import { MutableRefObject, useEffect, useMemo, useState } from 'react';
 
 interface ViewerProps {
   values: number[];
   _pause: MutableRefObject<boolean>;
   _delay: MutableRefObject<number>;
   generator: () => Generator<{ type: string; payload: number[] }>;
-  cb: () => void;
 }
 
-const Palette = {
-  normal: '#d1d5db',
-  pick: '#ffadad',
-  hold: '#99d98c',
-  done: '#7fc8f8',
-};
-
-function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const refs = useRef<HTMLDivElement[]>([]);
-  const sizeRef = useRef(0);
-  const [viewWidth] = useMeasure(rootRef);
-  const pointer = Array.from({ length: values.length }, (_, i) => i);
-
-  useEffect(() => {
-    operate();
-  }, []);
-
-  useEffect(() => {
-    sizeRef.current = Math.min(20, ~~((viewWidth - 10 * (values.length - 1)) / values.length));
-  }, [viewWidth]);
-
+function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
   /* Utils */
   const wait = () =>
     new Promise((resolve) => {
@@ -44,133 +20,160 @@ function Viewer({ values, _pause, _delay, generator, cb }: ViewerProps) {
       }, _delay.current);
     });
 
-  const changeColor = (indexes: number[], color: string) => {
-    indexes.forEach((index) => (refs.current[pointer[index]].style.background = color));
-  };
+  const [event, setEvent] = useState({
+    labels: { access: [], hold: [], done: [], flag: [] },
+    blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false, visible: true })),
+    stores: [],
+  });
+
+  const props = useMemo(() => {
+    const { labels, blocks, stores } = event;
+
+    const acc: any[] = [];
+
+    [...blocks, ...stores].filter(Boolean).forEach((block) => {
+      const { key, x, value, store, visible } = block;
+
+      acc[key] = {
+        left: x * (20 + 10),
+        top: store ? 0 : 200 - value * 20,
+        width: 20,
+        height: value * 20,
+        className: [
+          'absolute',
+          'rounded-md',
+          'bg-[#d1d5db]',
+          !visible && 'invisible',
+          store && 'bg-flag',
+          labels.access.includes(x) && 'bg-pick',
+          !store && labels.hold.includes(x) && 'bg-hold',
+          !store && !labels.hold.includes(x) && labels.done.includes(x) && 'bg-done',
+        ]
+          .filter(Boolean)
+          .join(' '),
+      };
+    });
+
+    return acc;
+  }, [event]);
 
   /* Operators */
-  let temp = -1;
-  let doneBlocks: number[] = [];
-
   const access = (payload: number[]) => {
-    changeColor(payload, Palette.pick);
+    setEvent((prev) => {
+      const { labels } = prev;
+
+      return {
+        ...prev,
+        labels: { ...labels, access: [...payload], hold: [] },
+      };
+    });
   };
 
   const swap = (payload: number[]) => {
     const [i, j] = payload;
-    const ref1 = refs.current[pointer[i]];
-    const ref2 = refs.current[pointer[j]];
 
-    changeColor(payload, Palette.hold);
+    setEvent((prev) => {
+      const { labels, blocks } = prev;
 
-    [pointer[i], pointer[j]] = [pointer[j], pointer[i]];
-    [ref1.style.left, ref2.style.left] = [ref2.style.left, ref1.style.left];
+      [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+
+      return {
+        ...prev,
+        labels: { ...labels, access: [], hold: [...payload] },
+        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+      };
+    });
   };
 
   const store = (payload: number[]) => {
     const [i] = payload;
-    const ref = refs.current[pointer[i]];
 
-    changeColor(payload, Palette.pick);
+    setEvent((prev) => {
+      const { labels, blocks, stores } = prev;
 
-    temp = pointer[i];
-    ref.style.top = 0 + 'px';
+      stores.push({ ...blocks[i], store: true });
+      blocks[i].visible = false;
+
+      return {
+        ...prev,
+        labels: { ...labels, flag: [...payload], hold: [] },
+      };
+    });
   };
 
-  const restore = async (payload: number[]) => {
+  const restore = (payload: number[]) => {
     const [i] = payload;
-    const ref = refs.current[temp];
 
-    ref.style.left = i * (sizeRef.current + 10) + 'px';
-    await wait();
-    ref.style.top = 200 - values[temp] * 20 + 'px';
+    setEvent((prev) => {
+      const { labels, blocks, stores } = prev;
 
-    pointer[i] = temp;
-    temp = -1;
+      blocks[i] = { ...stores.pop(), store: false };
+
+      return {
+        ...prev,
+        labels: { ...labels, hold: [...payload] },
+        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+      };
+    });
   };
 
-  const right = (payload: number[]) => {
+  const move = (payload: number[]) => {
     const [i, j] = payload;
-    const ref = refs.current[pointer[i]];
 
-    changeColor([i], Palette.hold);
-    ref.style.left = j * (sizeRef.current + 10) + 'px';
+    setEvent((prev) => {
+      const { labels, blocks } = prev;
 
-    pointer[j] = pointer[i];
+      blocks[j] = blocks[i];
+
+      return {
+        ...prev,
+        labels: { ...labels, hold: [...payload] },
+        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+      };
+    });
   };
 
   const done = (payload: number[]) => {
-    doneBlocks = doneBlocks.concat(payload.map((i) => pointer[i]));
-    doneBlocks.forEach((i) => (refs.current[i].style.background = Palette.done));
-  };
+    setEvent((prev) => {
+      const { labels } = prev;
 
-  const type = {
-    ACCESS: 'access',
-    SWAP: 'swap',
-    STORE: 'store',
-    RESTORE: 'restore',
-    RIGHT: 'right',
-    DONE: 'done',
-  };
-
-  const operator = {
-    [type.ACCESS]: access,
-    [type.SWAP]: swap,
-    [type.STORE]: store,
-    [type.RESTORE]: restore,
-    [type.RIGHT]: right,
-    [type.DONE]: done,
+      return {
+        ...prev,
+        labels: { ...labels, flag: [], done: [...labels.done, ...payload] },
+      };
+    });
   };
 
   const operate = async () => {
-    await wait();
-
-    pointer.forEach((i, j) => {
-      refs.current[i].style.left = j * (sizeRef.current + 10) + 'px';
-      refs.current[i].style.width = sizeRef.current + 'px';
-      refs.current[i].style.transition = `none`;
-    });
-
-    await wait();
-
     for (const { type, payload } of generator()) {
-      await operator[type](payload);
+      if (type === 'access') access(payload);
+      else if (type === 'swap') swap(payload);
+      else if (type === 'store') store(payload);
+      else if (type === 'restore') restore(payload);
+      else if (type === 'move') move(payload);
+      else if (type === 'done') done(payload);
 
       if (type !== 'done') await wait();
-
-      changeColor(
-        payload.filter((i) => temp !== pointer[i]).filter((j) => !doneBlocks.includes(pointer[j])),
-        Palette.normal
-      );
-
-      pointer.forEach((i, j) => {
-        refs.current[i].style.left = j * (sizeRef.current + 10) + 'px';
-        refs.current[i].style.width = sizeRef.current + 'px';
-        refs.current[i].style.transition = `left ${_delay.current / 1000}s, top ${
-          _delay.current / 1000
-        }s`;
-      });
     }
-
-    await wait();
-
-    cb();
   };
 
+  useEffect(() => {
+    operate();
+  }, []);
+
   return (
-    <div className="relative h-[200px] w-full" ref={rootRef}>
-      {values.map((value, index) => (
+    <div className="relative h-[200px] w-full">
+      {values.map((_, index) => (
         <div
           key={index}
-          className="absolute rounded-md bg-gray-300"
+          className={props[index].className}
           style={{
-            left: index * (sizeRef.current + 10),
-            top: 200 - value * 20,
-            width: sizeRef.current,
-            height: value * 20,
+            top: props[index].top,
+            left: props[index].left,
+            width: props[index].width,
+            height: props[index].height,
             transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
           }}
-          ref={(e: HTMLDivElement) => (refs.current[index] = e)}
         />
       ))}
     </div>
