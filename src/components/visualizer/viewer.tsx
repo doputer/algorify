@@ -5,6 +5,7 @@ interface ViewerProps {
   _pause: MutableRefObject<boolean>;
   _delay: MutableRefObject<number>;
   generator: () => Generator<{ type: string; payload: number[] }>;
+  reset: () => void;
 }
 
 interface Prop {
@@ -36,7 +37,7 @@ interface Event {
   stores: Block[];
 }
 
-function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
+function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
   /* Utils */
   const wait = () =>
     new Promise((resolve) => {
@@ -49,11 +50,13 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
       }, _delay.current);
     });
 
-  const [event, setEvent] = useState<Event>({
+  const initEvent = {
     labels: { pick: [], hold: [], flag: [], done: [] },
     blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false, visible: true })),
     stores: [],
-  });
+  };
+
+  const [event, setEvent] = useState<Event>(initEvent);
 
   const props = useMemo(() => {
     const { labels, blocks, stores } = event;
@@ -174,6 +177,20 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
     });
   };
 
+  const end = () => {
+    setEvent((prev) => {
+      return {
+        ...prev,
+        labels: {
+          pick: [],
+          hold: [],
+          flag: [],
+          done: [...Array.from({ length: values.length }, (_, i) => i)],
+        },
+      };
+    });
+  };
+
   const operate = async () => {
     for (const { type, payload } of generator()) {
       if (type === 'pick') pick(payload);
@@ -182,9 +199,14 @@ function Viewer({ values, _pause, _delay, generator }: ViewerProps) {
       else if (type === 'restore') restore(payload);
       else if (type === 'move') move(payload);
       else if (type === 'done') done(payload);
+      else if (type === 'end') end();
 
       if (type !== 'done') await wait();
     }
+
+    await wait();
+
+    reset();
   };
 
   useEffect(() => {

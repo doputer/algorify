@@ -20,6 +20,8 @@ function algorithm(array: number[]) {
       yield { type: 'done', payload: [aux + 1] };
     }
 
+    yield { type: 'end', payload: [] };
+
     return array;
   }
 

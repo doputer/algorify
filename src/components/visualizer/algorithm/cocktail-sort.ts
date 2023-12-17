@@ -12,7 +12,8 @@ function algorithm(array: number[]) {
           [array[i], array[i + 1]] = [array[i + 1], array[i]];
         }
         if (left + 1 === right) {
-          yield { type: 'done', payload: [left, right] };
+          yield { type: 'end', payload: [] };
+
           return array;
         }
       }
@@ -29,7 +30,8 @@ function algorithm(array: number[]) {
           [array[i - 1], array[i]] = [array[i], array[i - 1]];
         }
         if (left + 1 === right) {
-          yield { type: 'done', payload: [left, right] };
+          yield { type: 'end', payload: [] };
+
           return array;
         }
       }

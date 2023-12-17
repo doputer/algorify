@@ -39,6 +39,7 @@ const useView = (algorithm: string, initValues: number[]) => {
         _pause={_pause}
         _delay={_delay}
         generator={() => generator[algorithm]([...values])}
+        reset={() => setValues([...values])}
       />
     );
   };

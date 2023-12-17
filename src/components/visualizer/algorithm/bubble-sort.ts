@@ -12,6 +12,8 @@ function algorithm(array: number[]) {
       yield { type: 'done', payload: [array.length - i - 1] };
     }
 
+    yield { type: 'end', payload: [] };
+
     return array;
   }
 

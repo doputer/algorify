@@ -29,6 +29,8 @@ function algorithm(array: number[]) {
       }
     }
 
+    yield { type: 'end', payload: [] };
+
     return array;
   }
 
