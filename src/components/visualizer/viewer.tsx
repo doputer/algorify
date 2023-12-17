@@ -242,8 +242,12 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
   return (
     <div className="relative h-[200px] w-full" ref={rootRef}>
       {!rootRef.current ? (
-        <div className="flex h-[200px] w-full animate-spin items-center justify-center">
-          <UpdateIcon width={20} height={20} className="stroke-gray-500 dark:stroke-gray-300" />
+        <div className="flex h-[200px] w-full items-center justify-center">
+          <UpdateIcon
+            width={20}
+            height={20}
+            className="animate-spin stroke-gray-500 dark:stroke-gray-300"
+          />
         </div>
       ) : (
         values.map((_, index) => (
