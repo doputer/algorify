@@ -194,6 +194,14 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     });
   };
 
+  const start = () => {
+    setEvent((prev) => {
+      return {
+        ...prev,
+      };
+    });
+  };
+
   const end = () => {
     setEvent((prev) => {
       return {
@@ -217,6 +225,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       else if (type === 'move') move(payload);
       else if (type === 'flag') flag(payload);
       else if (type === 'done') done(payload);
+      else if (type === 'start') start();
       else if (type === 'end') end();
 
       if (type !== 'done' && type !== 'flag') await wait();

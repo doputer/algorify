@@ -1,5 +1,7 @@
 function algorithm(array: number[]) {
   function* generator(array: number[]) {
+    yield { type: 'start' };
+
     const shrink = 1.3;
     let gap = array.length;
     let sorted = false;
@@ -29,7 +31,7 @@ function algorithm(array: number[]) {
       }
     }
 
-    yield { type: 'end', payload: [] };
+    yield { type: 'end' };
 
     return array;
   }

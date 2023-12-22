@@ -1,5 +1,7 @@
 function algorithm(array: number[]) {
   function* generator(array: number[]) {
+    yield { type: 'start' };
+
     for (let i = 1; i < array.length; i++) {
       const temp = array[i];
       let aux = i - 1;
@@ -20,7 +22,7 @@ function algorithm(array: number[]) {
       yield { type: 'done', payload: [aux + 1] };
     }
 
-    yield { type: 'end', payload: [] };
+    yield { type: 'end' };
 
     return array;
   }
