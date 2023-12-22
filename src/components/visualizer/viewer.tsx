@@ -11,10 +11,13 @@ interface ViewerProps {
 }
 
 interface Prop {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
+  style: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    transition: string;
+  };
   className: string;
 }
 
@@ -29,7 +32,7 @@ interface Block {
   key: number;
   index: number;
   value: number;
-  store: boolean;
+  action: string;
 }
 
 interface Event {
@@ -56,7 +59,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
   const initEvent = {
     labels: { pick: [], hold: [], flag: [], done: [] },
-    blocks: values.map((i, j) => ({ key: j, index: j, value: i, store: false })),
+    blocks: values.map((i, j) => ({ key: j, index: j, value: i, action: '' })),
     stores: [],
   };
 
@@ -68,19 +71,30 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     const acc: Prop[] = [];
 
     [...blocks, ...stores].filter(Boolean).forEach((block) => {
-      const { key, index, value, store } = block;
+      const { key, index, value, action } = block;
 
       acc[key] = {
-        left: index * (sizeRef.current + 10),
-        top: store ? 0 : 200 - value * 20,
-        width: sizeRef.current,
-        height: value * 20,
+        style: {
+          left: index * (sizeRef.current + 10),
+          top: action === 'store' ? 0 : 200 - value * 20,
+          width: sizeRef.current,
+          height: value * 20,
+          transition: ['swap', 'move'].includes(action)
+            ? `left ${_delay.current / 1000}s`
+            : ['store'].includes(action)
+              ? `top ${_delay.current / 1000}s`
+              : ['restore'].includes(action)
+                ? `left ${_delay.current / 2000}s, top ${_delay.current / 2000}s ${
+                    _delay.current / 2000
+                  }s`
+                : ``,
+        },
         className: [
           'absolute',
           'rounded-md',
-          labels.hold.includes(index) && !store
+          labels.hold.includes(index) && action !== 'store'
             ? 'bg-hold'
-            : labels.flag.includes(index) || store
+            : labels.flag.includes(index) || action === 'store'
               ? 'bg-flag'
               : labels.pick.includes(index)
                 ? 'bg-pick'
@@ -116,6 +130,9 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
       [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
 
+      blocks[i].action = 'swap';
+      blocks[j].action = 'swap';
+
       return {
         ...prev,
         labels: { ...labels, pick: [], hold: [...payload] },
@@ -130,7 +147,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     setEvent((prev) => {
       const { labels, blocks, stores } = prev;
 
-      stores.push({ ...blocks[i], store: true });
+      stores.push({ ...blocks[i], action: 'store' });
 
       return {
         ...prev,
@@ -146,7 +163,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       const { labels, blocks, stores } = prev;
       const target = stores.pop();
 
-      if (target) blocks[i] = { ...target, store: false };
+      if (target) blocks[i] = { ...target, action: 'restore' };
 
       return {
         ...prev,
@@ -163,6 +180,8 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       const { labels, blocks } = prev;
 
       blocks[j] = blocks[i];
+
+      blocks[j].action = 'move';
 
       return {
         ...prev,
@@ -261,17 +280,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
         </div>
       ) : (
         values.map((_, index) => (
-          <div
-            key={index}
-            className={props[index].className}
-            style={{
-              top: props[index].top,
-              left: props[index].left,
-              width: props[index].width,
-              height: props[index].height,
-              transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
-            }}
-          />
+          <div key={index} style={props[index].style} className={props[index].className} />
         ))
       )}
     </div>
