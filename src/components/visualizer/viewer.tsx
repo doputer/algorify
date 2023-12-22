@@ -30,7 +30,6 @@ interface Block {
   x: number;
   value: number;
   store: boolean;
-  visible: boolean;
 }
 
 interface Event {
@@ -57,7 +56,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
   const initEvent = {
     labels: { pick: [], hold: [], flag: [], done: [] },
-    blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false, visible: true })),
+    blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false })),
     stores: [],
   };
 
@@ -69,7 +68,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     const acc: Prop[] = [];
 
     [...blocks, ...stores].filter(Boolean).forEach((block) => {
-      const { key, x, value, store, visible } = block;
+      const { key, x, value, store } = block;
 
       acc[key] = {
         left: x * (sizeRef.current + 10),
@@ -79,12 +78,15 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
         className: [
           'absolute',
           'rounded-md',
-          'bg-[#d1d5db]',
-          !visible && 'invisible',
-          (labels.flag.includes(x) || store) && 'bg-flag',
-          labels.pick.includes(x) && 'bg-pick',
-          !store && labels.hold.includes(x) && 'bg-hold',
-          !store && !labels.hold.includes(x) && labels.done.includes(x) && 'bg-done',
+          labels.hold.includes(x) && !store
+            ? 'bg-hold'
+            : labels.flag.includes(x) || store
+              ? 'bg-flag'
+              : labels.pick.includes(x)
+                ? 'bg-pick'
+                : labels.done.includes(x)
+                  ? 'bg-done'
+                  : 'bg-idle',
         ]
           .filter(Boolean)
           .join(' '),
@@ -129,7 +131,6 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       const { labels, blocks, stores } = prev;
 
       stores.push({ ...blocks[i], store: true });
-      blocks[i].visible = false;
 
       return {
         ...prev,
