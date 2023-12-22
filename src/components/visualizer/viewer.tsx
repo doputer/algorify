@@ -27,7 +27,7 @@ interface Label {
 
 interface Block {
   key: number;
-  x: number;
+  index: number;
   value: number;
   store: boolean;
 }
@@ -56,7 +56,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
   const initEvent = {
     labels: { pick: [], hold: [], flag: [], done: [] },
-    blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false })),
+    blocks: values.map((i, j) => ({ key: j, index: j, value: i, store: false })),
     stores: [],
   };
 
@@ -68,23 +68,23 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     const acc: Prop[] = [];
 
     [...blocks, ...stores].filter(Boolean).forEach((block) => {
-      const { key, x, value, store } = block;
+      const { key, index, value, store } = block;
 
       acc[key] = {
-        left: x * (sizeRef.current + 10),
+        left: index * (sizeRef.current + 10),
         top: store ? 0 : 200 - value * 20,
         width: sizeRef.current,
         height: value * 20,
         className: [
           'absolute',
           'rounded-md',
-          labels.hold.includes(x) && !store
+          labels.hold.includes(index) && !store
             ? 'bg-hold'
-            : labels.flag.includes(x) || store
+            : labels.flag.includes(index) || store
               ? 'bg-flag'
-              : labels.pick.includes(x)
+              : labels.pick.includes(index)
                 ? 'bg-pick'
-                : labels.done.includes(x)
+                : labels.done.includes(index)
                   ? 'bg-done'
                   : 'bg-idle',
         ]
@@ -119,7 +119,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       return {
         ...prev,
         labels: { ...labels, pick: [], hold: [...payload] },
-        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+        blocks: blocks.map((block, index) => ({ ...block, index })),
       };
     });
   };
@@ -151,7 +151,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       return {
         ...prev,
         labels: { ...labels, hold: [...payload] },
-        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+        blocks: blocks.map((block, index) => ({ ...block, index })),
       };
     });
   };
@@ -167,7 +167,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       return {
         ...prev,
         labels: { ...labels, hold: [...payload] },
-        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+        blocks: blocks.map((block, index) => ({ ...block, index })),
       };
     });
   };
