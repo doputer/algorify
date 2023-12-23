@@ -11,10 +11,13 @@ interface ViewerProps {
 }
 
 interface Prop {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
+  style: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    transition: string;
+  };
   className: string;
 }
 
@@ -27,10 +30,9 @@ interface Label {
 
 interface Block {
   key: number;
-  x: number;
+  index: number;
   value: number;
-  store: boolean;
-  visible: boolean;
+  action: string;
 }
 
 interface Event {
@@ -57,7 +59,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
   const initEvent = {
     labels: { pick: [], hold: [], flag: [], done: [] },
-    blocks: values.map((i, j) => ({ key: j, x: j, value: i, store: false, visible: true })),
+    blocks: values.map((i, j) => ({ key: j, index: j, value: i, action: '' })),
     stores: [],
   };
 
@@ -69,22 +71,36 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     const acc: Prop[] = [];
 
     [...blocks, ...stores].filter(Boolean).forEach((block) => {
-      const { key, x, value, store, visible } = block;
+      const { key, index, value, action } = block;
 
       acc[key] = {
-        left: x * (sizeRef.current + 10),
-        top: store ? 0 : 200 - value * 20,
-        width: sizeRef.current,
-        height: value * 20,
+        style: {
+          left: index * (sizeRef.current + 10),
+          top: action === 'store' ? 0 : 200 - value * 20,
+          width: sizeRef.current,
+          height: value * 20,
+          transition: ['swap', 'move'].includes(action)
+            ? `left ${_delay.current / 1000}s`
+            : ['store'].includes(action)
+              ? `top ${_delay.current / 1000}s`
+              : ['restore'].includes(action)
+                ? `left ${_delay.current / 2000}s, top ${_delay.current / 2000}s ${
+                    _delay.current / 2000
+                  }s`
+                : ``,
+        },
         className: [
           'absolute',
           'rounded-md',
-          'bg-[#d1d5db]',
-          !visible && 'invisible',
-          (labels.flag.includes(x) || store) && 'bg-flag',
-          labels.pick.includes(x) && 'bg-pick',
-          !store && labels.hold.includes(x) && 'bg-hold',
-          !store && !labels.hold.includes(x) && labels.done.includes(x) && 'bg-done',
+          labels.hold.includes(index) && action !== 'store'
+            ? 'bg-hold'
+            : labels.flag.includes(index) || action === 'store'
+              ? 'bg-flag'
+              : labels.pick.includes(index)
+                ? 'bg-pick'
+                : labels.done.includes(index)
+                  ? 'bg-done'
+                  : 'bg-idle',
         ]
           .filter(Boolean)
           .join(' '),
@@ -114,10 +130,13 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
       [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
 
+      blocks[i].action = 'swap';
+      blocks[j].action = 'swap';
+
       return {
         ...prev,
         labels: { ...labels, pick: [], hold: [...payload] },
-        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+        blocks: blocks.map((block, index) => ({ ...block, index })),
       };
     });
   };
@@ -128,8 +147,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
     setEvent((prev) => {
       const { labels, blocks, stores } = prev;
 
-      stores.push({ ...blocks[i], store: true });
-      blocks[i].visible = false;
+      stores.push({ ...blocks[i], action: 'store' });
 
       return {
         ...prev,
@@ -145,12 +163,12 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       const { labels, blocks, stores } = prev;
       const target = stores.pop();
 
-      if (target) blocks[i] = { ...target, store: false };
+      if (target) blocks[i] = { ...target, action: 'restore' };
 
       return {
         ...prev,
         labels: { ...labels, hold: [...payload] },
-        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+        blocks: blocks.map((block, index) => ({ ...block, index })),
       };
     });
   };
@@ -163,10 +181,12 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
 
       blocks[j] = blocks[i];
 
+      blocks[j].action = 'move';
+
       return {
         ...prev,
         labels: { ...labels, hold: [...payload] },
-        blocks: blocks.map((block, index) => ({ ...block, x: index })),
+        blocks: blocks.map((block, index) => ({ ...block, index })),
       };
     });
   };
@@ -189,6 +209,14 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       return {
         ...prev,
         labels: { ...labels, flag: [], done: [...labels.done, ...payload] },
+      };
+    });
+  };
+
+  const start = () => {
+    setEvent((prev) => {
+      return {
+        ...prev,
       };
     });
   };
@@ -216,6 +244,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
       else if (type === 'move') move(payload);
       else if (type === 'flag') flag(payload);
       else if (type === 'done') done(payload);
+      else if (type === 'start') start();
       else if (type === 'end') end();
 
       if (type !== 'done' && type !== 'flag') await wait();
@@ -251,17 +280,7 @@ function Viewer({ values, _pause, _delay, generator, reset }: ViewerProps) {
         </div>
       ) : (
         values.map((_, index) => (
-          <div
-            key={index}
-            className={props[index].className}
-            style={{
-              top: props[index].top,
-              left: props[index].left,
-              width: props[index].width,
-              height: props[index].height,
-              transition: `left ${_delay.current / 1000}s, top ${_delay.current / 1000}s`,
-            }}
-          />
+          <div key={index} style={props[index].style} className={props[index].className} />
         ))
       )}
     </div>

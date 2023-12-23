@@ -1,5 +1,7 @@
 function algorithm(array: number[]) {
   function* generator(array: number[]) {
+    yield { type: 'start' };
+
     let left = 0;
     let right = array.length - 1;
 
@@ -12,7 +14,7 @@ function algorithm(array: number[]) {
           [array[i], array[i + 1]] = [array[i + 1], array[i]];
         }
         if (left + 1 === right) {
-          yield { type: 'end', payload: [] };
+          yield { type: 'end' };
 
           return array;
         }
@@ -30,7 +32,7 @@ function algorithm(array: number[]) {
           [array[i - 1], array[i]] = [array[i], array[i - 1]];
         }
         if (left + 1 === right) {
-          yield { type: 'end', payload: [] };
+          yield { type: 'end' };
 
           return array;
         }
