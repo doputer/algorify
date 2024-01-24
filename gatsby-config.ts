@@ -4,7 +4,7 @@ const config: GatsbyConfig = {
   pathPrefix: '/algorify',
   siteMetadata: {
     title: `Algorify`,
-    siteUrl: `https://doputer.github.io/algorify`,
+    siteUrl: `https://project.dohyeon.dev/algorify`,
   },
   graphqlTypegen: true,
   trailingSlash: 'never',
